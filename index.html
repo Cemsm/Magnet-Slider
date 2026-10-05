@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magnet Slider - Oracle APEX item plug-in demo</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#20243b;--muted:#6c7284;--line:#e6e8ef}
+@media(prefers-color-scheme:dark){:root{--bg:#14151f;--card:#1d1f2e;--text:#e8eaf4;--muted:#9aa0b8;--line:#2e3146}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:40px 20px 60px}
+h1{margin:0 0 6px;font-size:30px}
+.lead{margin:0 0 28px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 16px;margin-bottom:20px}
+.card h2{margin:0 0 4px;font-size:18px;text-align:center}
+.card p{margin:0 0 12px;color:var(--muted);font-size:14px;text-align:center}
+.out{margin-top:6px;font-size:13px;color:var(--muted);text-align:center}
+.out code{background:var(--bg);padding:2px 6px;border-radius:5px;color:var(--text)}
+footer{margin-top:28px;color:var(--muted);font-size:13px}
+footer a{color:inherit}
+.ms-slider{--ms-track:#e6e8ef;--ms-text:var(--text);--ms-muted:var(--muted)}
+@media(prefers-color-scheme:dark){.ms-slider{--ms-track:#34374d}}
+/* Magnet Slider 0.1.0 | MIT. All rules are scoped to .ms-slider. */
+.ms-slider{border:1px solid var(--ms-accent);border-radius:10px;--ms-accent:#7255e7;--ms-track:#e6e8ef;--ms-text:#20243b;--ms-muted:#6c7284;box-sizing:border-box;min-width:0;width:100%;padding:8px 24px 12px;color:var(--ms-text);font:inherit}
+.ms-slider *{box-sizing:border-box}
+.ms-slider .ms-summary{display:flex;align-items:center;justify-content:space-between;min-height:40px;gap:12px;margin-bottom:12px}
+.ms-slider .ms-selection{color:var(--ms-accent);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ms-slider .ms-clear{border:0;background:transparent;font:inherit;font-size:12px;color:var(--ms-muted);padding:8px;cursor:pointer;border-radius:6px}
+.ms-slider .ms-clear:hover{background:var(--ms-track)}
+.ms-slider .ms-clear:disabled{opacity:.4;cursor:default}
+.ms-slider .ms-rail{position:relative;height:76px;touch-action:none;cursor:pointer;user-select:none}
+.ms-slider .ms-track{position:absolute;top:24px;inset-inline:0;height:8px;border-radius:100px;background:var(--ms-track);overflow:hidden}
+.ms-slider .ms-fill{position:absolute;top:0;height:100%;background:var(--ms-accent);border-radius:100px;transition:width .5s cubic-bezier(.34,1.56,.64,1),inset-inline-start .5s cubic-bezier(.34,1.56,.64,1)}
+.ms-slider .ms-handle{position:absolute;top:6px;width:44px;height:44px;margin-inline-start:-22px;padding:0;border:0;border-radius:50%;background:transparent;z-index:2;cursor:grab;touch-action:none;display:grid;place-items:center;transition:inset-inline-start .5s cubic-bezier(.34,1.56,.64,1);outline-offset:0}
+.ms-slider .ms-handle::before{content:'';position:absolute;width:28px;height:28px;border:3px solid var(--ms-accent);background:#fff;border-radius:50%;box-shadow:0 3px 9px #1b173429;transition:box-shadow 120ms,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.ms-slider .ms-grip{position:relative;width:6px;height:6px;background:var(--ms-accent);border-radius:50%}
+.ms-slider.ms-dragging .ms-handle::before{transform:scale(1.18)}
+.ms-slider .ms-handle:hover::before,.ms-slider .ms-handle:focus-visible::before{box-shadow:0 0 0 6px color-mix(in srgb,var(--ms-accent) 15%,transparent),0 3px 9px #1b173429;transform:scale(1.06)}
+.ms-slider .ms-handle:focus-visible,.ms-slider .ms-clear:focus-visible{outline:2px solid var(--ms-accent)}
+.ms-slider .ms-tick{position:absolute;top:25px;display:flex;align-items:center;flex-direction:column;width:0;pointer-events:none}
+.ms-slider .ms-dot{display:block;flex-shrink:0;width:6px;height:6px;background:#aeb3c4;border-radius:50%;z-index:1}
+.ms-slider .ms-in-range .ms-dot{background:color-mix(in srgb,var(--ms-accent) 45%,white)}
+.ms-slider .ms-tick-label{margin-top:24px;color:var(--ms-muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ms-slider.ms-empty .ms-fill{opacity:0}
+.ms-slider.ms-empty .ms-selection{font-size:16px;color:var(--ms-muted);font-weight:400}
+.ms-slider.ms-empty .ms-handle::before{border-style:dashed}
+.ms-slider.ms-disabled{opacity:.5}
+.ms-slider.ms-disabled .ms-rail,.ms-slider.ms-disabled .ms-handle{cursor:default}
+.ms-slider.ms-dragging .ms-handle{cursor:grabbing}
+.ms-slider.ms-dragging .ms-fill,.ms-slider.ms-dragging .ms-handle{transition-duration:.3s}
+@media(max-width:480px){.ms-slider{padding-inline:20px}.ms-slider .ms-tick-label{font-size:10px}.ms-slider .ms-selection{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.ms-slider *,.ms-slider *::before{transition:none!important}}
+@media(forced-colors:active){.ms-slider .ms-track{border:1px solid CanvasText}.ms-slider .ms-fill{background:Highlight}.ms-slider .ms-handle::before{border-color:ButtonText}.ms-slider .ms-grip{background:ButtonText}}
+
+.ms-slider .ms-bubble{position:absolute;bottom:47px;left:50%;transform:translateX(-50%) translateY(3px);background:var(--ms-accent);color:#fff;border-radius:7px;padding:6px 9px;white-space:nowrap;font:600 12px/1.2 system-ui;pointer-events:none;opacity:0;transition:opacity 100ms,transform 100ms}
+.ms-slider .ms-handle:hover .ms-bubble,.ms-slider .ms-handle:focus-visible .ms-bubble,.ms-slider.ms-dragging .ms-handle:focus .ms-bubble{opacity:1;transform:translateX(-50%) translateY(0)}
+.ms-slider.ms-at-edge .ms-handle,
+.ms-slider.ms-at-edge .ms-fill{transition-timing-function:cubic-bezier(.25,.9,.35,1)}
+.ms-label-box{width:100%;text-align:center}
+.ms-label-box .t-Form-label{display:block;font-weight:700;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>Magnet Slider</h1>
+  <p class="lead">An Oracle APEX item plug-in: pick a value, or a range, by sliding a handle that snaps to fixed stops. Drag a handle, click the rail, or use the keyboard (arrow keys, Page Up/Down, Home/End).</p>
+
+  <section class="card">
+    <h2>Single value</h2>
+    <p>Minimum 0, Maximum 100, Step 10, Suffix %</p>
+    <input type="text" id="demo_single" value="30">
+    <div class="out">Item value: <code id="out_single"></code></div>
+  </section>
+
+  <section class="card">
+    <h2>Range</h2>
+    <p>Minimum 0, Maximum 500, Step 50, Prefix $</p>
+    <input type="text" id="demo_range" value="100:350">
+    <div class="out">Item value: <code id="out_range"></code></div>
+  </section>
+
+  <section class="card">
+    <h2>Custom stops</h2>
+    <p>Custom Stops 1, 2, 5, 10, 25, 50, 100, with a custom accent color</p>
+    <input type="text" id="demo_custom" value="">
+    <div class="out">Item value: <code id="out_custom"></code></div>
+  </section>
+
+  <footer>
+    This is a standalone preview of the plug-in's JavaScript and CSS. In Oracle APEX, Magnet Slider is installed as an item plug-in and also provides server-side validation and session state.
+    <a href="https://github.com/Cemsm/Magnet-Slider">Source and install instructions on GitHub</a> (MIT license).
+  </footer>
+</main>
+
+<script>
+/* Magnet Slider 0.1.0 | MIT */
+(function (global) {
+  'use strict';
+  const SCALE = 1000000;
+  const NUMBER = /^-?(?:0|[1-9]\d*)(?:\.\d{1,6})?$/;
+  function number(value) {
+    const s = String(value).trim();
+    if (!NUMBER.test(s)) throw new Error('Use plain numbers with up to 6 decimal places.');
+    const n = Number(s);
+    if (!Number.isFinite(n) || Math.abs(n) > 1e9) throw new Error('Numbers must be between -1 billion and 1 billion.');
+    return Math.round(n * SCALE);
+  }
+  function domain(config) {
+    let values;
+    if (config.values != null && config.values !== '') {
+      const raw = Array.isArray(config.values) ? config.values : String(config.values).split(',');
+      values = raw.map(number);
+    } else {
+      const min = number(config.min ?? 0), max = number(config.max ?? 100), step = number(config.step ?? 10);
+      if (step <= 0 || max <= min || (max - min) % step !== 0) throw new Error('Max must exceed min and (max − min) must divide exactly by step.');
+      const count = (max - min) / step + 1;
+      if (count > 1001) throw new Error('Use at most 1,001 stops.');
+      values = Array.from({length: count}, (_, i) => min + i * step);
+    }
+    if (values.length < 2 || values.length > 1001 || values.some((v,i) => i && v <= values[i-1])) {
+      throw new Error('Supply 2–1,001 unique numbers in increasing order.');
+    }
+    return values.map(v => v / SCALE);
+  }
+  class Model {
+    constructor(config = {}) {
+      this.values = domain(config);
+      this.range = config.mode === 'range';
+      if (config.mode && !['single','range'].includes(config.mode)) throw new Error('Mode must be single or range.');
+      this.indices = this.range ? [0, this.values.length - 1] : [0];
+      this.empty = true;
+      try { this.set(config.value ?? ''); } catch (e) { this.set(''); }
+    }
+    set(value) {
+      if (value === '' || value == null) {
+      this.empty = true;
+      this.indices = this.range ? [0, this.values.length - 1] : [0];
+      return;
+      }
+      const parts = String(value).split(':');
+      if (parts.length !== (this.range ? 2 : 1)) throw new Error(this.range ? 'Use lower:upper.' : 'Use one number.');
+      const next = parts.map(p => this.values.indexOf(number(p) / SCALE));
+      if (next.some(i => i < 0) || (this.range && next[0] > next[1])) throw new Error('Choose allowed numbers in ascending order.');
+      this.indices = next; this.empty = false;
+    }
+    move(handle, index) {
+      const low = this.range && handle === 1 ? this.indices[0] : 0;
+      const high = this.range && handle === 0 ? this.indices[1] : this.values.length - 1;
+      this.indices[handle] = Math.max(low, Math.min(high, Math.round(index)));
+      this.empty = false;
+    }
+    get() { return this.empty ? '' : this.indices.map(i => this.values[i]).join(':'); }
+  }
+  function mount(inputOrId, config = {}) {
+    const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+    if (!input) throw new Error('Magnet Slider input not found.');
+    if (input.magnetSlider) input.magnetSlider.destroy();
+    const model = new Model({...config, value: input.value});
+    const initial = model.get();
+    const originalType = input.type;
+    input.type = 'hidden';
+    let disabled = !!config.disabled, active = null, startValue = '', lastHandle = 0;
+    const listeners = [];
+    function on(el, event, fn) { el.addEventListener(event, fn); listeners.push(() => el.removeEventListener(event, fn)); }
+    function el(tag, cls, text) { const x = document.createElement(tag); x.className = cls; if (text != null) x.textContent = text; return x; }
+    const root = el('div','ms-slider');
+    if (config.accent && /^#[0-9a-f]{6}$/i.test(config.accent)) root.style.setProperty('--ms-accent',config.accent);
+    const summary = el('div','ms-summary');
+    const status = el('span','ms-selection');
+    const clear = el('button','ms-clear',config.clearLabel || 'Clear'); clear.type = 'button';
+    clear.setAttribute('aria-label', (config.clearLabel || 'Clear') + ' ' + (config.label || input.id));
+    summary.append(status);
+    if (config.allowClear !== false) summary.append(clear);
+    const rail = el('div','ms-rail'), track = el('div','ms-track'), fill = el('div','ms-fill'), ticks = el('div','ms-ticks');
+    track.append(fill); rail.append(track,ticks);
+    const format = n => (config.prefix || '') + String(n) + (config.suffix || '');
+    const handles = model.indices.map((_,i) => {
+      const h = el('button','ms-handle'); h.type = 'button'; h.id = input.id + '_HANDLE_' + i;
+      h.setAttribute('role','slider'); h.setAttribute('aria-orientation','horizontal');
+      h.setAttribute('aria-label',(config.label || input.id) + (model.range ? (i ? ' — upper value' : ' — lower value') : ''));
+      const description = input.getAttribute('aria-describedby');
+      if (description) h.setAttribute('aria-describedby',description);
+      if (config.required) h.setAttribute('aria-required','true');
+      h.append(el('span','ms-grip'), el('span','ms-bubble'));
+      h.lastChild.setAttribute('aria-hidden','true');
+      rail.append(h); return h;
+    });
+    const marks = [];
+    // Thin dense domains to a readable set of visual ticks; every stop remains selectable.
+    const count = Math.min(model.values.length, Math.max(2,Math.min(21,Number(config.maxTicks) || 11)));
+    const markIndices = [...new Set(Array.from({length:count},(_,i)=>Math.round(i*(model.values.length-1)/(count-1))))];
+    markIndices.forEach(i=>{
+      const t = el('span','ms-tick'); t.style.insetInlineStart = i/(model.values.length-1)*100+'%';
+      t.append(el('span','ms-dot'),el('span','ms-tick-label',String(model.values[i])));ticks.append(t);marks.push([i,t]);
+    });
+    root.append(summary,rail); input.after(root);
+    const labelBox = input.closest('.t-Form-fieldContainer')?.querySelector('.t-Form-labelContainer');
+    if (labelBox) labelBox.classList.add('ms-label-box');
+    const rtl = () => getComputedStyle(root).direction === 'rtl';
+    function paint() {
+      input.value = model.get(); root.classList.toggle('ms-empty',model.empty); root.classList.toggle('ms-disabled',disabled);
+      status.textContent = model.empty ? (config.emptyLabel || 'Choose a value') : model.indices.map(i=>format(model.values[i])).join(' — ');
+      clear.disabled = disabled || model.empty;
+      root.classList.toggle('ms-at-edge', model.indices.some(i => i === 0 || i === model.values.length - 1));
+      const a = model.range ? model.indices[0] : 0, b = model.indices[model.indices.length-1];
+      fill.style.insetInlineStart = a/(model.values.length-1)*100+'%'; fill.style.width = (b-a)/(model.values.length-1)*100+'%';
+      handles.forEach((h,i)=>{
+        h.style.insetInlineStart = model.indices[i]/(model.values.length-1)*100+'%';
+        h.disabled = disabled;
+        h.setAttribute('aria-valuemin',model.values[model.range && i===1 ? model.indices[0] : 0]);
+        h.setAttribute('aria-valuemax',model.values[model.range && i===0 ? model.indices[1] : model.values.length-1]);
+        h.setAttribute('aria-valuenow',model.values[model.indices[i]]);
+        h.setAttribute('aria-valuetext',model.empty ? (config.emptyLabel || 'No value selected') : format(model.values[model.indices[i]]));
+        h.title = format(model.values[model.indices[i]]);
+        h.querySelector('.ms-bubble').textContent = h.title;
+      });
+      marks.forEach(([i,t])=>t.classList.toggle('ms-in-range', !model.empty && i>=a && i<=b));
+    }
+    function emit(name) { input.dispatchEvent(new Event(name,{bubbles:true})); }
+    function commit(before) { if (model.get() !== before) emit('change'); }
+    function move(i, index) { const before=model.get(); model.move(i,index); paint(); if (before!==model.get()) emit('input'); }
+    function pointerIndex(e) { const r=rail.getBoundingClientRect(); let f=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); return (rtl()?1-f:f)*(model.values.length-1); }
+    on(rail,'pointerdown', e=>{
+      if (disabled || !e.isPrimary || e.button!==0) return;
+      const hit=handles.findIndex(h=>h===e.target || h.contains(e.target));
+      const index=pointerIndex(e);
+      let chosen=hit;
+      if (chosen<0) {
+        if (!model.range) chosen=0;
+        else {
+          const d0=Math.abs(index-model.indices[0]),d1=Math.abs(index-model.indices[1]);
+          chosen=d0===d1 ? (index<model.indices[0]?0:index>model.indices[1]?1:lastHandle) : d0<d1?0:1;
+        }
+      }
+      active={handle:chosen,id:e.pointerId}; lastHandle=chosen; startValue=model.get();
+      root.classList.add('ms-dragging'); handles[chosen].focus(); rail.setPointerCapture(e.pointerId);
+      move(chosen,index); e.preventDefault();
+    });
+    on(rail,'pointermove',e=>{if(active && active.id===e.pointerId) move(active.handle,pointerIndex(e));});
+    function finish(e) { if(!active || active.id!==e.pointerId)return; active=null; root.classList.remove('ms-dragging'); commit(startValue); }
+    on(rail,'pointerup',finish);on(rail,'pointercancel',finish);on(rail,'lostpointercapture',finish);
+    handles.forEach((h,i)=>{
+      on(h,'focus',()=>{lastHandle=i; handles.forEach(x=>x.style.zIndex='2');h.style.zIndex='3';});
+      on(h,'keydown',e=>{
+        if(disabled)return;
+        let n=model.indices[i];
+        switch(e.key){
+          case 'ArrowRight':n+=rtl()?-1:1;break;
+          case 'ArrowLeft':n+=rtl()?1:-1;break;
+          case 'ArrowUp':n++;break;case 'ArrowDown':n--;break;
+          case 'PageUp':n+=10;break;case 'PageDown':n-=10;break;
+          case 'Home':n=0;break;case 'End':n=model.values.length-1;break;
+          default:return;
+        }
+        e.preventDefault(); const before=model.get();move(i,n);commit(before);
+      });
+    });
+    on(clear,'click',()=>{
+        const before=model.get();
+        if(document.activeElement) document.activeElement.blur();
+        model.set('');paint();emit('input');commit(before);
+    });
+    if(input.form) on(input.form,'reset',()=>queueMicrotask(()=>{model.set(initial);paint();}));
+    const api={
+      getValue:()=>model.get(),
+      setValue(value){model.set(value);paint();},
+      disable(){disabled=true;paint();},enable(){disabled=false;paint();},isDisabled:()=>disabled,
+      focus(){handles[0].focus();},
+      destroy(){listeners.forEach(fn=>fn());if (labelBox) labelBox.classList.remove('ms-label-box');root.remove();input.type=originalType;delete input.magnetSlider;},
+      model,root
+    };
+    input.magnetSlider=api;
+    if(global.apex && global.apex.item && typeof global.apex.item.create==='function') {
+      global.apex.item.create(input.id,{
+        item_type:'MAGNET_SLIDER', getValue:api.getValue,setValue:api.setValue,
+        disable:api.disable,enable:api.enable,isDisabled:api.isDisabled,
+        isChanged:()=>model.get()!==initial,isEmpty:()=>model.empty,
+        setFocusTo:()=>global.apex.jQuery(handles[0]),
+        setStyleTo:()=>global.apex.jQuery(root),
+        show:()=>{root.hidden=false;},hide:()=>{root.hidden=true;},
+        getValidity:()=>({valid:!config.required || !model.empty,valueMissing:!!config.required && model.empty}),
+        getValidationMessage:()=>config.required && model.empty?'Choose a value.':'',
+        displayValueFor:value=>String(value).split(':').map(x=>format(x)).join(' — ')
+      });
+    }
+    paint();return api;
+  }
+  const api={Model,domain,mount,version:'0.1.0'};
+  if(typeof module!=='undefined' && module.exports) module.exports=api;
+  global.MagnetSlider=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+(function(){
+  function wire(id,out,config){
+    var input=document.getElementById(id), output=document.getElementById(out);
+    MagnetSlider.mount(id,config);
+    function show(){output.textContent=input.value===''?'(empty)':input.value;}
+    input.addEventListener('input',show);input.addEventListener('change',show);show();
+  }
+  wire('demo_single','out_single',{mode:'single',min:0,max:100,step:10,suffix:'%',label:'Percentage',accent:'#7255e7'});
+  wire('demo_range','out_range',{mode:'range',min:0,max:500,step:50,prefix:'$',label:'Price range',accent:'#0f9d8a'});
+  wire('demo_custom','out_custom',{mode:'single',values:[1,2,5,10,25,50,100],label:'Custom stops',accent:'#e0457b'});
+})();
+</script>
+</body>
+</html>
