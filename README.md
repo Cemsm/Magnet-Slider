@@ -3,7 +3,6 @@
   <img src="screenshots/preview.png" width="600" alt="Magnet Slider preview">
 </p>
 
-# Magnet Slider
 
 **Magnet Slider** is an Oracle APEX **item plug-in** for picking a number, or a range of two numbers, by sliding a handle that *snaps* to fixed stops. Instead of free-moving values, users can only choose from the stops you define, so what gets saved is always a valid value.
 
