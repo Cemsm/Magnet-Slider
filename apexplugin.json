@@ -1,0 +1,33 @@
+{
+  "name": "Magnet-Slider",
+  "version": "0.1.0",
+  "description": "Snapping single or range slider item with custom stops, bounce animation and an accent color picker. Requires APEX 26.1 or later.",
+  "keywords": ["slider", "range", "item", "snap", "color"],
+  "homepage": "https://github.com/Cemsm/Magnet-Slider",
+  "bugs": {
+    "url": "https://github.com/Cemsm/Magnet-Slider/issues",
+    "email": "cemsm@proton.me"
+  },
+  "license": "MIT",
+  "commercial": "No",
+  "author": {
+    "name": "Mohammad Saleh Moeinadini (Cemsm)",
+    "email": "cemsm@proton.me",
+    "url": "https://github.com/Cemsm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cemsm/Magnet-Slider.git"
+  },
+  "oracle": {
+    "versions": ["23.26.1.0.0"],
+    "apex": {
+      "versions": ["26.1.0"],
+      "plugin": {
+        "internalName": "COM_CEMSM_MAGNET_SLIDER",
+        "type": "item",
+        "previewImage": "https://raw.githubusercontent.com/Cemsm/Magnet-Slider/main/screenshots/preview.png"
+      }
+    }
+  }
+}
